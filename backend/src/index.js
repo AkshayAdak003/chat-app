@@ -19,7 +19,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// ⚡ CORS
+
 app.use(
   cors({
     origin: "http://localhost:5173", // you can also put your Render frontend URL here
@@ -31,22 +31,15 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 
-// === SERVE FRONTEND IN PRODUCTION ===
+
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(_dirname, "../frontend/dist")));
 
-<<<<<<< HEAD
-  app.get("/*",(req,res)=>{
-    res.sendFile(path.join(_dirname,"../frontend", "dist", "index.html"));
-  })
-};
-=======
-  // ✅ FIXED catch-all route
   app.get("/*", (req, res) => {
     res.sendFile(path.join(_dirname, "../frontend", "dist", "index.html"));
   });
 }
->>>>>>> a197d85add399e51da651177338a769894a24afe
+
 
 // === SERVER ===
 server.listen(PORT, () => {
