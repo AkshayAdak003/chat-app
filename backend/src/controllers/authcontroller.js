@@ -2,7 +2,7 @@ import { generateToken } from "../lib/utils.js";
 import User from "../models/usermodel.js";
 import bcrypt from "bcryptjs";
 import cloudinary from "../lib/cloudinary.js";
-
+import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
   const { fullName, email, password } = req.body;
@@ -50,9 +50,9 @@ export const signup = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-
-    console.log("BODY RECEIVED:", req.body);
+  console.log("BODY RECEIVED:", req.body);
   const { email, password } = req.body;
+
   try {
     const user = await User.findOne({ email });
 
@@ -65,9 +65,19 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    generateToken(user._id, res);
+    // ✅ generate token & set cookie
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
-    res.status(200).json({
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // true for production
+      sameSite: "none", // important for cross-origin
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return res.status(200).json({
       _id: user._id,
       fullName: user.fullName,
       email: user.email,
@@ -75,8 +85,8 @@ export const login = async (req, res) => {
       createdAt: user.createdAt,
     });
   } catch (error) {
-    console.log("Error in login controller", error.message);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.log("Error in login controller:", error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
