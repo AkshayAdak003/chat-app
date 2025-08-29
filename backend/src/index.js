@@ -22,7 +22,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // you can also put your Render frontend URL here
+    origin: ["http://localhost:5173","https://chat-app-lemon-phi.vercel.app"], // you can also put your Render frontend URL here
     credentials: true,
   })
 );
